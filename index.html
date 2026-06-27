@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Jogo da Velha Insano</title>
+
+<style>
+body{
+    background:#111;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+    overflow:hidden;
+    transition:.5s;
+}
+
+/* GIF DO TÍTULO */
+#tituloGif{
+    margin-top:15px;
+    width:320px;
+    max-width:90%;
+    filter: drop-shadow(0 0 10px cyan);
+}
+
+/* TABULEIRO */
+#tabuleiro{
+    display:grid;
+    grid-template-columns:repeat(3,110px);
+    gap:10px;
+    width:max-content;
+    margin:20px auto;
+    transition:.5s;
+}
+
+/* CASAS */
+.casa{
+    width:110px;
+    height:110px;
+    background:linear-gradient(145deg,#222,#111);
+    border:3px solid white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    user-select:none;
+    border-radius:15px;
+    box-shadow:0 0 10px rgba(0,255,255,0.2);
+    transition:.2s;
+    font-size:70px;
+}
+
+.casa:hover{
+    transform:scale(1.08);
+    box-shadow:0 0 15px rgba(0,255,255,0.6);
+}
+
+.x{
+    color:#ff3b3b;
+    text-shadow:0 0 15px red;
+}
+
+.o{
+    color:#00d4ff;
+    text-shadow:0 0 15px cyan;
+}
+
+#msg{
+    font-size:22px;
+    color:yellow;
+    height:35px;
+}
+
+button{
+    padding:10px 20px;
+    font-size:18px;
+    margin-top:10px;
+}
+</style>
+</head>
+<body>
+
+<!-- 🔥 GIF NO LUGAR DO TÍTULO -->
+<img id="tituloGif" src="titulo.gif" alt="titulo">
+
+<div id="msg">Sua vez (X)</div>
+
+<div id="tabuleiro"></div>
+
+<button onclick="reiniciar()">Reiniciar</button>
+
+<script>
+
+const tab=document.getElementById("tabuleiro");
+const msg=document.getElementById("msg");
+
+const casas=[];
+let fim=false;
+
+const linhas=[
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
+];
+
+for(let i=0;i<9;i++){
+let c=document.createElement("div");
+c.className="casa";
+c.onclick=()=>jogar(i);
+tab.appendChild(c);
+casas.push(c);
+}
+
+function jogar(i){
+if(fim) return;
+if(casas[i].innerHTML!="") return;
+
+casas[i].innerHTML="<span class='x'>X</span>";
+
+if(ganhou("x")){
+msg.innerHTML="🎉 VOCÊ GANHOU!";
+fim=true;
+return;
+}
+
+setTimeout(bot,500);
+}
+
+function bot(){
+if(fim) return;
+
+let e=Math.floor(Math.random()*6);
+
+if(e==0) jogadaNormal();
+
+if(e==1){
+msg.innerHTML="🌀 Tabuleiro girou!";
+tab.style.transform="rotate("+Math.random()*360+"deg)";
+jogadaNormal();
+}
+
+if(e==2){
+msg.innerHTML="🐱 Gato apareceu!";
+let l=livres();
+if(l.length) l[0].innerHTML="🐱";
+}
+
+if(e==3){
+msg.innerHTML="💥 Bot apagou X!";
+let xs=casas.filter(c=>c.innerHTML.includes("x"));
+if(xs.length) xs[Math.floor(Math.random()*xs.length)].innerHTML="";
+jogadaNormal();
+}
+
+if(e==4){
+msg.innerHTML="🌈 CAOS!";
+document.body.style.background="#"+Math.floor(Math.random()*16777215).toString(16);
+jogadaNormal();
+}
+
+if(e==5){
+msg.innerHTML="😂 Bot jogou duas vezes!";
+jogadaNormal();
+jogadaNormal();
+}
+
+if(ganhou("o")){
+msg.innerHTML="🤖 BOT VENCEU!";
+fim=true;
+return;
+}
+
+}
+
+function jogadaNormal(){
+let l=livres();
+if(l.length==0) return;
+
+let c=l[Math.floor(Math.random()*l.length)];
+c.innerHTML="<span class='o'>O</span>";
+}
+
+function livres(){
+return casas.filter(c=>c.innerHTML=="");
+}
+
+function ganhou(s){
+return linhas.some(l=>
+l.every(i=>casas[i].innerHTML.toLowerCase().includes(s))
+);
+}
+
+function reiniciar(){
+casas.forEach(c=>c.innerHTML="");
+tab.style.transform="rotate(0deg)";
+document.body.style.background="#111";
+msg.innerHTML="Sua vez (X)";
+fim=false;
+}
+
+</script>
+
+</body>
+</html>
